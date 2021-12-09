@@ -39,13 +39,27 @@
         group: root
         owner: ec2-user
     
+    - name: Check if conf.d is present in config file
+      lineinfile:
+        path: /etc/nginx/nginx.conf
+        line: "include /etc/nginx/conf.d/*"
+        firstmatch: yes
+        state: present 
+      check_mode: yes
+
     - name: Add site-enabled directory to nginx config file
       lineinfile:
         path: /etc/nginx/nginx.conf
-        line: "/etc/nginx/sites-enabled/*"
+        regexp: "include /etc/nginx/conf.d/*" 
+        line: "include /etc/nginx/sites-enabled/*"
         state: present
         backup: yes
     
+    - name: Create document root
+      file: 
+        path: "{{ document_root }}"
+        state: directory
+        
     - name: Copy website files to the server's document root
       copy:
         src: "{{ app_root }}"
